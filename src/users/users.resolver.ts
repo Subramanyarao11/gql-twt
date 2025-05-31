@@ -1,4 +1,11 @@
-import { Resolver, Query, Args, Mutation } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Args,
+  Mutation,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
 import { UseGuards } from '@nestjs/common';
@@ -33,5 +40,25 @@ export class UsersResolver {
     @Args('input') updateUserInput: UpdateUserInput,
   ): Promise<User> {
     return this.usersService.update(user.id, updateUserInput);
+  }
+
+  @ResolveField(() => Number)
+  async followersCount(@Parent() user: User): Promise<number> {
+    return user.followersCount;
+  }
+
+  @ResolveField(() => Number)
+  async followingCount(@Parent() user: User): Promise<number> {
+    return user.followingCount;
+  }
+
+  @ResolveField(() => Number)
+  async tweetsCount(@Parent() user: User): Promise<number> {
+    return user.tweetsCount;
+  }
+
+  @ResolveField(() => Boolean)
+  async isFollowing(@Parent() user: User): Promise<boolean> {
+    return user.isFollowing;
   }
 }
