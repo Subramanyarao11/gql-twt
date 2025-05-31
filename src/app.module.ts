@@ -8,6 +8,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { TweetsModule } from './tweets/tweets.module';
+import { FollowsModule } from './follows/follows.module';
+import { AuthModule } from './auth/auth.module';
+import { LikesModule } from './likes/likes.module';
 
 @Module({
   imports: [
@@ -34,7 +37,10 @@ import { TweetsModule } from './tweets/tweets.module';
       logging: process.env.NODE_ENV === 'development',
     }),
     UsersModule,
+    AuthModule,
     TweetsModule,
+    FollowsModule,
+    LikesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

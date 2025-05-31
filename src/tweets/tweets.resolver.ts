@@ -93,4 +93,18 @@ export class TweetsResolver {
   async repliesCount(@Parent() tweet: Tweet): Promise<number> {
     return tweet.replies?.length || 0;
   }
+
+  @ResolveField(() => Int)
+  async likesCount(@Parent() tweet: Tweet): Promise<number> {
+    return tweet.likes?.length || 0;
+  }
+
+  @ResolveField(() => Boolean)
+  async isLiked(
+    @Parent() tweet: Tweet,
+    @CurrentUser() user?: User,
+  ): Promise<boolean> {
+    if (!user) return false;
+    return tweet.likes?.some((like) => like.userId === user.id) || false;
+  }
 }

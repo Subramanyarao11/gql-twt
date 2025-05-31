@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { User } from '../../users/entities/user.entity';
+import { Like } from 'src/likes/enitites/like.entity';
 
 @ObjectType()
 @Entity('tweets')
@@ -45,6 +46,10 @@ export class Tweet {
   @Field(() => [Tweet])
   @OneToMany(() => Tweet, (tweet) => tweet.replyTo)
   replies: Tweet[];
+
+  @Field(() => [Like])
+  @OneToMany(() => Like, (like) => like.tweet)
+  likes: Like[];
 
   @Field()
   @CreateDateColumn()
