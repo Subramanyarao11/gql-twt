@@ -4,8 +4,10 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { Tweet } from 'src/tweets/entities/tweet.entity';
 
 @ObjectType()
 @Entity('users')
@@ -40,6 +42,10 @@ export class User {
   @Field({ nullable: true })
   @Column({ nullable: true })
   coverImage?: string;
+
+  @Field(() => [Tweet])
+  @OneToMany(() => Tweet, (tweet) => tweet.author)
+  tweets: Tweet[];
 
   @Field()
   @CreateDateColumn()
