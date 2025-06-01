@@ -11,7 +11,9 @@ import { UsersService } from './users.service';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { UpdateUserInput } from './dto/update-user.inpu';
+import { UpdateUserInput } from './dto/update-user.input';
+import type { FileUpload } from 'graphql-upload/GraphQLUpload.mjs';
+import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -40,6 +42,24 @@ export class UsersResolver {
     @Args('input') updateUserInput: UpdateUserInput,
   ): Promise<User> {
     return this.usersService.update(user.id, updateUserInput);
+  }
+
+  @Mutation(() => User)
+  @UseGuards(JwtAuthGuard)
+  async updateProfileImage(
+    @CurrentUser() user: User,
+    @Args('file', { type: () => GraphQLUpload }) file: FileUpload,
+  ): Promise<User> {
+    return this.usersService.updateProfileImage(user.id, file);
+  }
+
+  @Mutation(() => User)
+  @UseGuards(JwtAuthGuard)
+  async updateCoverImage(
+    @CurrentUser() user: User,
+    @Args('file', { type: () => GraphQLUpload }) file: FileUpload,
+  ): Promise<User> {
+    return this.usersService.updateCoverImage(user.id, file);
   }
 
   @ResolveField(() => Number)

@@ -9,12 +9,15 @@ import { Tweet } from './entities/tweet.entity';
 import { User } from '../users/entities/user.entity';
 import { CreateTweetInput } from './dto/create-tweet-input';
 import { UpdateTweetInput } from './dto/update-tweet-input';
+import { UploadsService } from 'src/upload/upload.service';
+import { FileUpload } from 'graphql-upload/processRequest.mjs';
 
 @Injectable()
 export class TweetsService {
   constructor(
     @InjectRepository(Tweet)
     private tweetRepository: Repository<Tweet>,
+    private uploadsService: UploadsService,
   ) {}
 
   async create(
@@ -23,6 +26,40 @@ export class TweetsService {
   ): Promise<Tweet> {
     const tweet = this.tweetRepository.create({
       ...createTweetInput,
+      authorId: author.id,
+    });
+
+    return this.tweetRepository.save(tweet);
+  }
+
+  async createWithImage(
+    createTweetInput: CreateTweetInput,
+    file: FileUpload | null,
+    author: User,
+  ): Promise<Tweet> {
+    let imageUrl: string | undefined;
+
+    if (file) {
+      const { createReadStream } = file;
+      const stream = createReadStream();
+      const chunks: Buffer[] = [];
+
+      for await (const chunk of stream) {
+        chunks.push(chunk);
+      }
+
+      const buffer = Buffer.concat(chunks);
+      const base64 = `data:image/jpeg;base64,${buffer.toString('base64')}`;
+
+      imageUrl = await this.uploadsService.uploadImage(
+        base64,
+        'twitter-clone/tweets',
+      );
+    }
+
+    const tweet = this.tweetRepository.create({
+      ...createTweetInput,
+      image: imageUrl,
       authorId: author.id,
     });
 
@@ -99,6 +136,11 @@ export class TweetsService {
 
     if (tweet.authorId !== user.id) {
       throw new ForbiddenException('You can only delete your own tweets');
+    }
+
+    if (tweet.image) {
+      const publicId = this.uploadsService.getPublicIdFromUrl(tweet.image);
+      await this.uploadsService.deleteImage(`twitter-clone/tweets/${publicId}`);
     }
 
     const result = await this.tweetRepository.delete(id);

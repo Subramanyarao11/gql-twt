@@ -15,6 +15,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { CreateTweetInput } from './dto/create-tweet-input';
 import { UpdateTweetInput } from './dto/update-tweet-input';
+import GraphQLUpload, { FileUpload } from 'graphql-upload/GraphQLUpload.mjs';
 
 @Resolver(() => Tweet)
 export class TweetsResolver {
@@ -68,6 +69,17 @@ export class TweetsResolver {
     @CurrentUser() user: User,
   ): Promise<Tweet> {
     return this.tweetsService.create(createTweetInput, user);
+  }
+
+  @Mutation(() => Tweet)
+  @UseGuards(JwtAuthGuard)
+  async createTweetWithImage(
+    @Args('input') createTweetInput: CreateTweetInput,
+    @Args('file', { type: () => GraphQLUpload, nullable: true })
+    file: FileUpload,
+    @CurrentUser() user: User,
+  ): Promise<Tweet> {
+    return this.tweetsService.createWithImage(createTweetInput, file, user);
   }
 
   @Mutation(() => Tweet)
